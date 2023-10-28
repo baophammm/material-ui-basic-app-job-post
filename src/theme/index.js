@@ -4,14 +4,14 @@ import {
   createTheme,
   ThemeProvider as MUIThemeProvider,
 } from '@mui/material/styles';
-import { orange, red } from '@mui/material/colors';
+import { grey, orange, red } from '@mui/material/colors';
 
 const PRIMARY = {
-  lighter: '#f9e9e9',
-  light: '#423e3e',
-  main: '#000',
-  dark: '#383030',
-  darker: '#000',
+  lighter: grey[500],
+  light: grey[600],
+  main: grey[700],
+  dark: grey[800],
+  darker: grey[900],
   contrastText: '#FFF',
 };
 const SECONDARY = {
@@ -58,14 +58,15 @@ function ThemeProvider({ children }) {
       primary: PRIMARY,
       secondary: SECONDARY,
       success: SUCCESS,
+      grey: GREY,
       text: {
         primary: GREY[800],
         secondary: SECONDARY['contrastText'],
         disabled: GREY[500],
       },
       background: {
-        paper: PRIMARY.contrastText,
-        default: PRIMARY.main,
+        paper: alpha(grey[900], 0.56),
+        default: PRIMARY.darker,
         neutral: GREY[200],
       },
       action: {
@@ -80,13 +81,6 @@ function ThemeProvider({ children }) {
       },
     },
     shape: { borderRadius: 8 },
-    overrides: {
-      MuiPaginationItem: {
-        textPrimary: {
-          color: 'white', // Change the text color to red
-        },
-      },
-    },
   };
 
   const theme = createTheme(themeOptions);

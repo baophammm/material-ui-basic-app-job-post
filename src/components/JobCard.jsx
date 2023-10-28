@@ -6,15 +6,20 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
+import { useContext } from 'react';
+import { AppContext } from '../App';
 
 const CardContainer = styled(Box)(({ theme }) => ({
-  background: theme.palette.primary.light,
+  background: theme.palette.primary.dark,
   color: theme.palette.primary.contrastText,
+  borderRadius: theme.shape.borderRadius,
   width: '100%',
   height: '100%',
-  bgcolor: 'background.paper',
+  paddingLeft: '10px',
+  paddingRight: '10px',
+
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
@@ -24,13 +29,26 @@ const CardContainer = styled(Box)(({ theme }) => ({
 const SkillChip = styled(Chip)(({ theme }) => ({
   background: theme.palette.secondary.dark,
   color: theme.palette.primary.contrastText,
-  p: '1px',
+  padding: '1px',
   fontSize: '14px',
   lineHeight: '16px',
   height: 'auto',
 
   '&:hover': {
     background: theme.palette.secondary.light,
+  },
+}));
+
+const LearnMoreContainer = styled(Box)(({ theme }) => ({
+  background: theme.palette.success.light,
+  color: theme.palette.success.contrastText,
+  padding: '5px',
+  borderRadius: theme.shape.borderRadius,
+  fontSize: '0.8rem',
+  fontWeight: 'bold',
+  '&:hover': {
+    background: theme.palette.success.dark,
+    color: theme.palette.success.contrastText,
   },
 }));
 
@@ -43,12 +61,7 @@ const LearnMoreButton = styled(Button)(({ theme }) => ({
 }));
 
 export default function JobCard({ job }) {
-  const handleClick = () => {
-    console.info('You clicked the Chip.');
-  };
-
-  const navigate = useNavigate();
-
+  const { isSignedIn, location } = useContext(AppContext);
   return (
     <CardContainer>
       <Box sx={{ mt: 3, width: 0.9 }}>
@@ -57,31 +70,23 @@ export default function JobCard({ job }) {
             {job.title}
           </Typography>
         </Grid>
-        <Divider variant="fullWidth" />
+        <Divider variant="fullwidth" />
       </Box>
 
       <Box
         sx={{
           mt: 1,
           mx: 2,
+          width: 1,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
           alignItems: 'left',
         }}
       >
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            width: 1,
-            display: 'flex',
-            justifyContent: 'left',
-            flexWrap: 'wrap',
-          }}
-        >
+        <Stack direction="row" spacing={1} maxWidth useFlexGap flexWrap="wrap">
           {job.skills.slice(0, 4).map((skill, index) => (
-            <SkillChip key={index} label={skill} onClick={handleClick} />
+            <SkillChip key={index} label={skill} />
           ))}
         </Stack>
         <Typography
@@ -105,9 +110,19 @@ export default function JobCard({ job }) {
           alignItems: 'center',
         }}
       >
-        <LearnMoreButton onClick={() => navigate(`/job/${job.id}`)}>
-          LEARN MORE
-        </LearnMoreButton>
+        <Link
+          className="job-modal-link"
+          // to={isSignedIn ? `/job/${job.id}` : '/sign-in'}
+          to={`/job/${job.id}`}
+          // state={
+          //   isSignedIn
+          //     ? { previousLocation: location }
+          //     : { previousLocation: location, from: `/job/${job.id}` }
+          // }
+          state={{ previousLocation: location }}
+        >
+          <LearnMoreContainer>LEARN MORE</LearnMoreContainer>
+        </Link>
       </Box>
     </CardContainer>
   );

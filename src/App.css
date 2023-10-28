@@ -3,17 +3,23 @@
 }
 
 body {
-  margin: 0px;
+  height: 100%;
 }
 
-.App {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+#root {
+  height: 100%;
 }
 
-.routes-component {
-  border: 1px solid green,
-  
+.job-modal-link {
+  text-decoration: none;
+  color: inherit
+}
+
+signin-modal-link {
+  text-decoration: none;
+  color: inherit
+}
+
+.sign-in-text {
+  text-decoration: none;
 }

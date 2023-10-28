@@ -7,12 +7,19 @@ import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import LoginIcon from '@mui/icons-material/Login';
-import { useNavigate } from 'react-router-dom';
-import Grid from '@mui/system/Unstable_Grid/Grid';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import Grid from '@mui/material/Grid';
+import { useState } from 'react';
+import { useContext } from 'react';
+import { AppContext } from '../App';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 
 const SearchAppBarBox = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.contrastText,
-  background: theme.palette.primary.light,
+  background: theme.palette.primary.dark,
   width: '100%',
 }));
 
@@ -58,14 +65,73 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const AccountBox = styled(Box)(({ theme }) => ({
+  color: theme.palette.primary.contrastText,
+  padding: 3,
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  '&:hover': {
+    cursor: 'pointer',
+  },
+}));
+
+const StyledLoginInIcon = styled(LoginIcon)(({ theme }) => ({
+  color: theme.palette.primary.contrastText,
+  width: '36px',
+  height: 'auto',
+  padding: '5px',
+  borderRadius: '50%',
+  '&:hover': {
+    backgroundColor: theme.palette.primary.light,
+  },
+}));
+const StyledLogoutIcon = styled(LogoutIcon)(({ theme }) => ({
+  width: '36px',
+  height: 'auto',
+  padding: '5px',
+  borderRadius: '50%',
+  '&:hover': {
+    backgroundColor: theme.palette.primary.light,
+  },
+}));
+
 export default function SearchAppBar() {
+  const {
+    isSignedIn,
+    setIsSignedIn,
+    loginData,
+    searchParams,
+    setSearchParams,
+    location,
+  } = useContext(AppContext);
   const navigate = useNavigate();
+
+  const handleSignOutButton = () => {
+    setIsSignedIn(false);
+  };
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <SearchAppBarBox>
-      {/* <AppBar position="fixed" sx={{ display: 'flex', flexDirection: 'row' }}> */}
-      <Grid container spacing={2}>
-        <Grid item xs={7.5} sm={9} md={10}>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Grid item xs={10} sm={11} md={8.5} sx={{ flexGrow: 1 }}>
           <Toolbar sx={{ width: '100%' }}>
             <Typography
               onClick={() => navigate(`/`)}
@@ -80,31 +146,157 @@ export default function SearchAppBar() {
             >
               Job Routing
             </Typography>
+
             <Search sx={{ flexGrow: 1 }}>
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
               <StyledInputBase
+                id="search-input"
                 placeholder="Search…"
                 inputProps={{ 'aria-label': 'search' }}
-                width={1}
+                fullWidth
+                value={searchParams.get('filter') || ''}
+                onChange={event => {
+                  let filter = event.target.value;
+                  if (filter) {
+                    setSearchParams({ filter });
+                  } else {
+                    setSearchParams({});
+                  }
+                }}
               />
             </Search>
           </Toolbar>
         </Grid>
-        <Grid item xs={4.5} sm={3} md={2}>
-          <Box
-            color="inherit"
-            aria-label="open drawer"
-            sx={{
-              p: 3,
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-            }}
+        <Grid
+          item
+          md={3.5}
+          sx={{
+            display: { xs: 'none', sm: 'none', md: 'flex' },
+            alignItems: 'center',
+            flexGrow: 1,
+          }}
+        >
+          {!isSignedIn ? (
+            <Box
+              sx={{
+                width: '300px',
+                pr: '10px',
+                display: 'flex',
+                justifyContent: 'right',
+                alignItems: 'center',
+              }}
+            >
+              <Link
+                className="signin-modal-link"
+                to="/sign-in"
+                state={{ previousLocation: location }}
+              >
+                <AccountBox aria-label="open drawer" width={'110px'}>
+                  <StyledLoginInIcon />
+                  <Typography className="sign-in-text">Sign in</Typography>
+                </AccountBox>
+              </Link>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                width: '300px',
+                pr: '10px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <AccountCircleIcon />
+              <Typography>{loginData.username}</Typography>
+
+              <AccountBox
+                aria-label="open drawer"
+                width={'110px'}
+                onClick={handleSignOutButton}
+              >
+                <StyledLogoutIcon />
+                <Typography>Sign out</Typography>
+              </AccountBox>
+            </Box>
+          )}
+        </Grid>
+        <Grid
+          item
+          xs={2}
+          sm={1}
+          sx={{
+            height: '100%',
+            display: { sm: 'flex', md: 'none' },
+            justifyContent: 'left',
+            alignItems: 'center',
+            flexGrow: 1,
+          }}
+        >
+          <IconButton
+            aria-label="more"
+            id="long-button"
+            aria-controls={open ? 'long-menu' : undefined}
+            aria-expanded={open ? 'true' : undefined}
+            aria-haspopup="true"
+            onClick={handleClick}
           >
-            <LoginIcon /> {'  |  '} Sign in
-          </Box>
+            <MoreVertIcon />
+          </IconButton>
+          {!isSignedIn ? (
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button',
+              }}
+            >
+              <MenuItem onClick={handleClose}>
+                <Link
+                  className="signin-modal-link"
+                  to="/sign-in"
+                  state={{ previousLocation: location }}
+                >
+                  <AccountBox aria-label="open drawer" width={'110px'}>
+                    <StyledLoginInIcon />
+                    <Typography className="sign-in-text">Sign in</Typography>
+                  </AccountBox>
+                </Link>
+              </MenuItem>
+            </Menu>
+          ) : (
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button',
+              }}
+            >
+              <MenuItem
+                onClick={handleClose}
+                sx={{ color: 'primary.contrastText' }}
+              >
+                <AccountCircleIcon />
+                <Typography>{loginData.username}</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleClose}>
+                <AccountBox
+                  aria-label="open drawer"
+                  width={'110px'}
+                  onClick={handleSignOutButton}
+                >
+                  <StyledLogoutIcon />
+                  <Typography>Sign out</Typography>
+                </AccountBox>
+              </MenuItem>
+            </Menu>
+          )}
         </Grid>
       </Grid>
     </SearchAppBarBox>
